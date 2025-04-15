@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
-# URL de conexión
+# Conexión a PostgreSQL
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 def get_db_connection():
@@ -42,7 +42,7 @@ def registrar():
 
         if not name or len(name) < 3:
             errores.append("El nombre debe tener al menos 3 caracteres.")
-        if not phone.isdigit() or len(phone) < 10 or len(phone) > 15:
+        if not phone.isdigit() or not 10 <= len(phone) <= 15:
             errores.append("El teléfono debe contener solo números y tener entre 10 y 15 dígitos.")
 
         if not errores:
@@ -54,22 +54,16 @@ def registrar():
             if cliente:
                 cliente_id, visitas, existing_name = cliente
                 visitas += 1
-                mensaje = f"Cliente ya registrado ({existing_name}). Se agregó una nueva visita."
-
-                if visitas == 5:
-                    mensaje += f" {existing_name} está a una visita de un descuento 🎉"
-                elif visitas == 6:
-                    mensaje += f" {existing_name} ya tiene un descuento 🥳"
-                    visitas = 0  # Se reiniciará a 1 justo después
-
+                if visitas > 6:
+                    visitas = 1
                 cursor.execute('''
                     UPDATE clients
                     SET visits = %s, last_visit_date = CURRENT_DATE
                     WHERE id = %s
-                ''', (1 if visitas == 0 else visitas, cliente_id))
+                ''', (visitas, cliente_id))
                 conn.commit()
                 conn.close()
-                flash(mensaje, "info")
+                flash(f"{existing_name} ya registrado. Se agregó una nueva visita.", "info")
                 return redirect('/clientes')
             else:
                 cursor.execute('''
@@ -91,7 +85,7 @@ def sumar_visita():
     if request.method == 'POST':
         phone = request.form['phone'].strip()
 
-        if not phone.isdigit() or len(phone) < 10 or len(phone) > 15:
+        if not phone.isdigit() or not 10 <= len(phone) <= 15:
             error = "El teléfono debe tener entre 10 y 15 dígitos."
         else:
             conn = get_db_connection()
@@ -102,19 +96,20 @@ def sumar_visita():
             if cliente:
                 cliente_id, name, visitas = cliente
                 visitas += 1
-                mensaje = f"Visita registrada para {name}."
+                if visitas > 6:
+                    visitas = 1
 
+                mensaje = f"Visita registrada para {name}."
                 if visitas == 5:
-                    mensaje += " ¡Una más para descuento! 🎉"
+                    mensaje += " ¡Una más para descuento!"
                 elif visitas == 6:
-                    mensaje += " ¡Tiene un descuento! 🥳"
-                    visitas = 0  # reinicia
+                    mensaje += " ¡Tiene un descuento!"
 
                 cursor.execute('''
                     UPDATE clients
                     SET visits = %s, last_visit_date = CURRENT_DATE
                     WHERE id = %s
-                ''', (1 if visitas == 0 else visitas, cliente_id))
+                ''', (visitas, cliente_id))
                 conn.commit()
             else:
                 error = "Cliente no encontrado."
