@@ -11,9 +11,11 @@ app.secret_key = 'sup3rs3cretk3y'
 # Configuración para PostgreSQL
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
+# Conectar a la base de datos
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL, sslmode='require')
 
+# Crear tabla si no existe
 def create_table():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -142,7 +144,7 @@ def add_visit(client_id):
         return redirect('/')
     name, current_visits = result
 
-    # Lógica de visitas y mensajes
+    # Actualiza visita y da mensajes
     if current_visits == 6:
         new_visits = 1
         flash(f'{name} ya tiene un descuento por su 6ta visita 🥳')
@@ -150,6 +152,9 @@ def add_visit(client_id):
         new_visits = current_visits + 1
         if new_visits == 5:
             flash(f'{name} está a una visita de obtener un descuento 🎉')
+        elif new_visits == 6:
+            flash(f'{name} ya tiene un descuento por su 6ta visita 🥳')
+            new_visits = 1
 
     cursor.execute('''
         UPDATE clients SET visits = %s, last_visit_date = %s WHERE id = %s
@@ -159,6 +164,7 @@ def add_visit(client_id):
     conn.close()
 
     flash('¡Visita registrada!')
+
     return redirect('/')
 
 @app.route('/delete/<int:client_id>', methods=['POST'])
@@ -192,5 +198,4 @@ def export_csv():
                      download_name='clientes.csv', as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(debug=True)
-
+    app.run()
