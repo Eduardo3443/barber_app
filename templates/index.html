@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Clientes</title>
+</head>
+<body>
+    <h1>Lista de Clientes</h1>
+    <a href="/agregar">Agregar Cliente</a>
+    <table border="1">
+        <tr>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Visitas</th>
+            <th>Última Visita</th>
+            <th>Acciones</th>
+        </tr>
+        {% for cliente in clientes %}
+        <tr>
+            <td>{{ cliente.nombre }}</td>
+            <td>{{ cliente.telefono }}</td>
+            <td>{{ cliente.visitas }}</td>
+            <td>{{ cliente.ultima_visita.strftime('%Y-%m-%d %H:%M') if cliente.ultima_visita else '' }}</td>
+            <td>
+                <a href="/sumar_visita/{{ cliente.id }}">Sumar Visita</a> |
+                <a href="/editar/{{ cliente.id }}">Editar</a> |
+                <a href="/eliminar/{{ cliente.id }}">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="/exportar">Exportar CSV</a>
+</body>
+</html>
