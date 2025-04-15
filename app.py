@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string, request, redirect, flash, send_file
+from flask import Flask, render_template, request, redirect, flash, send_file
 import psycopg2
 from datetime import datetime
 import csv
@@ -31,33 +31,7 @@ def create_db():
 
 @app.route('/')
 def home():
-    return render_template_string("""
-    <!doctype html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>THE KRAKEN BARBER SHOP</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-        <style>
-            body { font-family: Arial, sans-serif; }
-            .container { margin-top: 50px; text-align: center; }
-            h2 { color: #808080; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <img src="/static/logo.jpg" alt="Logo Kraken" class="img-fluid" style="max-width: 300px;">
-            <h2>THE KRAKEN BARBERSHOP</h2>
-            <div class="mt-4">
-                <a href="/clientes" class="btn btn-primary btn-lg">Ver Clientes</a>
-                <a href="/registrar" class="btn btn-success btn-lg">Registrar Cliente</a>
-                <a href="/sumar_visita" class="btn btn-warning btn-lg">Sumar Visita</a>
-            </div>
-        </div>
-    </body>
-    </html>
-    """)
+    return render_template('index.html')
 
 @app.route('/registrar', methods=['GET', 'POST'])
 def registrar():
@@ -101,7 +75,7 @@ def registrar():
                 flash(f"Cliente {name} registrado con su primera visita.", 'success')
                 return redirect('/clientes')
 
-    return render_template_string(open('templates/registrar.html').read(), errores=errores)
+    return render_template('registrar.html', errores=errores)
 
 @app.route('/sumar_visita', methods=['GET', 'POST'])
 def sumar_visita():
@@ -141,7 +115,7 @@ def sumar_visita():
                 error = "Cliente no encontrado."
             conn.close()
 
-    return render_template_string(open('templates/sumar_visita.html').read(), mensaje=mensaje, error=error)
+    return render_template('sumar_visita.html', mensaje=mensaje, error=error)
 
 @app.route('/clientes')
 def clientes():
@@ -151,7 +125,7 @@ def clientes():
     clientes = cursor.fetchall()
     conn.close()
 
-    return render_template_string(open('templates/clientes.html').read(), clientes=clientes)
+    return render_template('clientes.html', clientes=clientes)
 
 @app.route('/eliminar/<int:cliente_id>')
 def eliminar(cliente_id):

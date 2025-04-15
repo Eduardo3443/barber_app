@@ -1,0 +1,14 @@
+<h2>Clientes</h2>
+<table border="1">
+  <tr><th>Nombre</th><th>Teléfono</th><th>Visitas</th><th>Última visita</th><th>Acciones</th></tr>
+  {% for cliente in clientes %}
+  <tr>
+    <td>{{ cliente[1] }}</td>
+    <td>{{ cliente[2] }}</td>
+    <td>{{ cliente[3] }}</td>
+    <td>{{ cliente[4] or '' }}</td>
+    <td><a href="/eliminar/{{ cliente[0] }}">Eliminar</a></td>
+  </tr>
+  {% endfor %}
+</table>
+<a href="/">Volver</a> | <a href="/exportar">Exportar CSV</a>
