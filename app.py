@@ -137,13 +137,32 @@ def add_visit(client_id):
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     conn = get_db_connection()
     cursor = conn.cursor()
+
+    # Obtener nombre y visitas actuales
+    cursor.execute('SELECT name, visits FROM clients WHERE id = %s', (client_id,))
+    result = cursor.fetchone()
+    if not result:
+        flash('Cliente no encontrado.')
+        return redirect('/')
+    name, current_visits = result
+
+    if current_visits == 6:
+        new_visits = 1
+        flash(f'{name} ya tiene un descuento por su 6ta visita 🥳')
+    else:
+        new_visits = current_visits + 1
+        if new_visits == 5:
+            flash(f'{name} está a una visita de obtener un descuento 🎉')
+
     cursor.execute('''
-        UPDATE clients SET visits = visits + 1, last_visit_date = %s WHERE id = %s
-    ''', (now, client_id))
+        UPDATE clients SET visits = %s, last_visit_date = %s WHERE id = %s
+    ''', (new_visits, now, client_id))
     conn.commit()
     cursor.close()
     conn.close()
+
     flash('¡Visita registrada!')
+
     return redirect('/')
 
 @app.route('/delete/<int:client_id>', methods=['POST'])
