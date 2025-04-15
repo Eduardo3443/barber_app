@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
-# Conexión a PostgreSQL
+# URL de conexión
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 def get_db_connection():
@@ -54,16 +54,22 @@ def registrar():
             if cliente:
                 cliente_id, visitas, existing_name = cliente
                 visitas += 1
-                if visitas > 6:
-                    visitas = 1
+                mensaje = f"Cliente ya registrado ({existing_name}). Se agregó una nueva visita."
+
+                if visitas == 5:
+                    mensaje += f" {existing_name} está a una visita de un descuento 🎉"
+                elif visitas == 6:
+                    mensaje += f" {existing_name} ya tiene un descuento 🥳"
+                    visitas = 0  # Se reiniciará a 1 justo después
+
                 cursor.execute('''
                     UPDATE clients
                     SET visits = %s, last_visit_date = CURRENT_DATE
                     WHERE id = %s
-                ''', (visitas, cliente_id))
+                ''', (1 if visitas == 0 else visitas, cliente_id))
                 conn.commit()
                 conn.close()
-                flash(f"Cliente ya registrado ({existing_name}). Se agregó una nueva visita.", "info")
+                flash(mensaje, "info")
                 return redirect('/clientes')
             else:
                 cursor.execute('''
@@ -96,20 +102,19 @@ def sumar_visita():
             if cliente:
                 cliente_id, name, visitas = cliente
                 visitas += 1
-                if visitas > 6:
-                    visitas = 1
-
                 mensaje = f"Visita registrada para {name}."
+
                 if visitas == 5:
-                    mensaje += " ¡Una más para descuento!"
+                    mensaje += " ¡Una más para descuento! 🎉"
                 elif visitas == 6:
-                    mensaje += " ¡Tiene un descuento!"
+                    mensaje += " ¡Tiene un descuento! 🥳"
+                    visitas = 0  # reinicia
 
                 cursor.execute('''
                     UPDATE clients
                     SET visits = %s, last_visit_date = CURRENT_DATE
                     WHERE id = %s
-                ''', (visitas, cliente_id))
+                ''', (1 if visitas == 0 else visitas, cliente_id))
                 conn.commit()
             else:
                 error = "Cliente no encontrado."
@@ -124,7 +129,6 @@ def clientes():
     cursor.execute("SELECT id, name, phone, visits, last_visit_date FROM clients")
     clientes = cursor.fetchall()
     conn.close()
-
     return render_template('clientes.html', clientes=clientes)
 
 @app.route('/eliminar/<int:cliente_id>')

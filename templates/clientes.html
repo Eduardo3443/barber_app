@@ -1,14 +1,43 @@
-<h2>Clientes</h2>
-<table border="1">
-  <tr><th>Nombre</th><th>Teléfono</th><th>Visitas</th><th>Última visita</th><th>Acciones</th></tr>
-  {% for cliente in clientes %}
-  <tr>
-    <td>{{ cliente[1] }}</td>
-    <td>{{ cliente[2] }}</td>
-    <td>{{ cliente[3] }}</td>
-    <td>{{ cliente[4] or '' }}</td>
-    <td><a href="/eliminar/{{ cliente[0] }}">Eliminar</a></td>
-  </tr>
-  {% endfor %}
-</table>
-<a href="/">Volver</a> | <a href="/exportar">Exportar CSV</a>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clientes Registrados</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="mb-4">Clientes Registrados</h2>
+
+    <a href="/exportar" class="btn btn-outline-success mb-3">📥 Exportar CSV</a>
+
+    <table class="table table-bordered table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>Nombre</th>
+          <th>Teléfono</th>
+          <th>Visitas</th>
+          <th>Última Visita</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in clientes %}
+          <tr>
+            <td>{{ c[1] }}</td>
+            <td>{{ c[2] }}</td>
+            <td>{{ c[3] }}</td>
+            <td>{{ c[4] or 'Sin fecha' }}</td>
+            <td>
+              <a href="/eliminar/{{ c[0] }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar cliente?')">Eliminar</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <a href="/" class="btn btn-link">Volver al Inicio</a>
+  </div>
+</body>
+</html>
