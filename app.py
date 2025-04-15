@@ -11,11 +11,9 @@ app.secret_key = 'sup3rs3cretk3y'
 # Configuración para PostgreSQL
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
-# Conectar a la base de datos
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL, sslmode='require')
 
-# Crear tabla si no existe
 def create_table():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -34,7 +32,6 @@ def create_table():
 
 create_table()
 
-# HTML embebido con Jinja
 TEMPLATE = """
 <!DOCTYPE html>
 <html lang="es">
@@ -138,7 +135,6 @@ def add_visit(client_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Obtener nombre y visitas actuales
     cursor.execute('SELECT name, visits FROM clients WHERE id = %s', (client_id,))
     result = cursor.fetchone()
     if not result:
@@ -146,6 +142,7 @@ def add_visit(client_id):
         return redirect('/')
     name, current_visits = result
 
+    # Lógica de visitas y mensajes
     if current_visits == 6:
         new_visits = 1
         flash(f'{name} ya tiene un descuento por su 6ta visita 🥳')
@@ -162,7 +159,6 @@ def add_visit(client_id):
     conn.close()
 
     flash('¡Visita registrada!')
-
     return redirect('/')
 
 @app.route('/delete/<int:client_id>', methods=['POST'])
@@ -197,3 +193,4 @@ def export_csv():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
