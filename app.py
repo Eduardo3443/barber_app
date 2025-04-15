@@ -11,11 +11,9 @@ app.secret_key = 'sup3rs3cretk3y'
 # Configuración para PostgreSQL
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
-# Conectar a la base de datos
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL, sslmode='require')
 
-# Crear tabla si no existe
 def create_table():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -49,8 +47,8 @@ TEMPLATE = """
         th { background-color: #333; color: white; }
         td { background-color: white; }
         input, button { padding: 6px; }
-        .msg { color: green; }
-        .error { color: red; }
+        .msg { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -121,8 +119,8 @@ def index():
                            (name, phone, now))
             flash('Cliente agregado con éxito.')
         except psycopg2.errors.UniqueViolation:
-            flash('Ese teléfono ya está registrado.')
             conn.rollback()
+            flash('Ese teléfono ya está registrado.')
         conn.commit()
 
     cursor.execute('SELECT * FROM clients ORDER BY id')
@@ -142,28 +140,30 @@ def add_visit(client_id):
     if not result:
         flash('Cliente no encontrado.')
         return redirect('/')
-    name, current_visits = result
+    
+    name, visits = result
+    mensaje_especial = ""
 
-    # Actualiza visita y da mensajes
-    if current_visits == 6:
+    if visits == 5:
+        new_visits = 6
+        mensaje_especial = f'{name} ya tiene un descuento por su 6ta visita 🥳'
+    elif visits == 4:
+        new_visits = 5
+        mensaje_especial = f'{name} está a una visita de obtener un descuento 🎉'
+    elif visits >= 6:
         new_visits = 1
-        flash(f'{name} ya tiene un descuento por su 6ta visita 🥳')
     else:
-        new_visits = current_visits + 1
-        if new_visits == 5:
-            flash(f'{name} está a una visita de obtener un descuento 🎉')
-        elif new_visits == 6:
-            flash(f'{name} ya tiene un descuento por su 6ta visita 🥳')
-            new_visits = 1
+        new_visits = visits + 1
 
-    cursor.execute('''
-        UPDATE clients SET visits = %s, last_visit_date = %s WHERE id = %s
-    ''', (new_visits, now, client_id))
+    cursor.execute('UPDATE clients SET visits = %s, last_visit_date = %s WHERE id = %s',
+                   (new_visits, now, client_id))
     conn.commit()
     cursor.close()
     conn.close()
 
     flash('¡Visita registrada!')
+    if mensaje_especial:
+        flash(mensaje_especial)
 
     return redirect('/')
 
@@ -198,4 +198,4 @@ def export_csv():
                      download_name='clientes.csv', as_attachment=True)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
