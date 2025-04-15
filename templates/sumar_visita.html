@@ -1,12 +1,40 @@
-<h2>Sumar Visita</h2>
-<form method="post">
-  <input name="phone" placeholder="Teléfono" required><br>
-  <button type="submit">Sumar</button>
-</form>
-{% if mensaje %}
-  <p style="color:green;">{{ mensaje }}</p>
-{% endif %}
-{% if error %}
-  <p style="color:red;">{{ error }}</p>
-{% endif %}
-<a href="/">Volver</a>
+<!-- templates/sumar_visita.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Visita registrada</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            text-align: center;
+            padding: 40px;
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #007BFF;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+        a:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cliente: {{ nombre }}</h1>
+    <p>Total de visitas: {{ visitas }}</p>
+    <h2>{{ mensaje }}</h2>
+    <a href="/">Volver al inicio</a>
+</body>
+</html>
